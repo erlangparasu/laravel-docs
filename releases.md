@@ -18,25 +18,22 @@ For LTS releases, such as Laravel 6, bug fixes are provided for 2 years and secu
 
 | Version | Release | Bug Fixes Until | Security Fixes Until |
 | --- | --- | --- | --- |
-| 5.5 (LTS) | August 30th, 2017 | August 30th, 2019 | August 30th, 2020 |
-| 5.6 | February 7th, 2018 | August 7th, 2018 | February 7th, 2019 |
-| 5.7 | September 4th, 2018 | March 4th, 2019 | September 4th, 2019 |
-| 5.8 | February 26th, 2019 | August 26th, 2019 | February 26th, 2020 |
 | 6 (LTS) | September 3rd, 2019 | September 3rd, 2021 | September 3rd, 2022 |
-| 7 | March 3rd, 2020 | September 3rd, 2020 | March 3rd, 2021 |
+| 7 | March 3rd, 2020 | September 10th, 2020 | March 3rd, 2021 |
+| 8 | September 8th, 2020 | March 8th, 2021 | September 8th, 2021 |
 
 <a name="laravel-7"></a>
 ## Laravel 7
 
-Laravel 7 continues the improvements made in Laravel 6.x by introducing Laravel Airlock, routing speed improvements, custom Eloquent casts, Blade component tags, fluent string operations, a developer focused HTTP client, first-party CORS support, improved scoping for route model binding, stub customization, database queue improvements, multiple mail drivers, query-time casts, a new `artisan test` command, and a variety of other bug fixes and usability improvements.
+Laravel 7 continues the improvements made in Laravel 6.x by introducing Laravel Sanctum, routing speed improvements, custom Eloquent casts, Blade component tags, fluent string operations, a developer focused HTTP client, first-party CORS support, improved scoping for route model binding, stub customization, database queue improvements, multiple mail drivers, query-time casts, a new `artisan test` command, and a variety of other bug fixes and usability improvements.
 
-### Laravel Airlock
+### Laravel Sanctum
 
-_Laravel Airlock was built by [Taylor Otwell](https://github.com/taylorotwell)_.
+_Laravel Sanctum was built by [Taylor Otwell](https://github.com/taylorotwell)_.
 
-Laravel Airlock provides a featherweight authentication system for SPAs (single page applications), mobile applications, and simple, token based APIs. Airlock allows each user of your application to generate multiple API tokens for their account. These tokens may be granted abilities / scopes which specify which actions the tokens are allowed to perform.
+Laravel Sanctum provides a featherweight authentication system for SPAs (single page applications), mobile applications, and simple, token based APIs. Sanctum allows each user of your application to generate multiple API tokens for their account. These tokens may be granted abilities / scopes which specify which actions the tokens are allowed to perform.
 
-For more information on Laravel Airlock, consult the [Airlock documentation](/docs/{{version}}/airlock).
+For more information on Laravel Sanctum, consult the [Sanctum documentation](/docs/{{version}}/sanctum).
 
 ### Custom Eloquent Casts
 
@@ -112,7 +109,7 @@ _Blade component tags were contributed by [Spatie](https://spatie.be/), [Marcel 
 
 > {tip} Blade components have been overhauled to allow tag based rendering, attribute management, component classes, inline view components, and more. Since the overhaul of Blade components is so extensive, please consult the [full Blade component documentation](/docs/{{version}}/blade#components) to learn about this feature.
 
-In summary, a component may now have an associated class which specifies the data it accepts. All public properties and methods defined on the component class will automatically be made available to the component view. Any additional HTML attributes specified on the component may be managed using the automatically included `$attribute` variable, which is an attribute bag instance.
+In summary, a component may now have an associated class which specifies the data it accepts. All public properties and methods defined on the component class will automatically be made available to the component view. Any additional HTML attributes specified on the component may be managed using the automatically included `$attributes` variable, which is an attribute bag instance.
 
 In this example, we will assume that an `App\View\Components\Alert` component has been defined like so:
 
@@ -167,7 +164,7 @@ And, assuming the component's Blade template has been defined like so:
 
     <!-- /resources/views/components/alert.blade.php -->
 
-    <div class="alert {{ $classForType() }}" {{ $attributes }}>
+    <div class="alert {{ $classForType }}" {{ $attributes }}>
         {{ $heading }}
 
         {{ $slot }}
@@ -196,7 +193,7 @@ Laravel now provides an expressive, minimal API around the [Guzzle HTTP client](
     use Illuminate\Support\Facades\Http;
 
     $response = Http::withHeaders([
-        'X-First' => 'foo'
+        'X-First' => 'foo',
         'X-Second' => 'bar'
     ])->post('http://test.com/users', [
         'name' => 'Taylor',
@@ -328,7 +325,7 @@ In addition to the `phpunit` command, you may now use the `test` Artisan command
     php artisan test
 
 <p align="center">
-<img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1582142435/Screen_Shot_2020-02-19_at_2.00.01_PM.png">
+<img src="https://laravel.com/img/docs/7x-release-notes-artisan-test-preview.png">
 </p>
 
 Any arguments that can be passed to the `phpunit` command may also be passed to the Artisan `test` command:
@@ -342,7 +339,7 @@ _Markdown mail template improvements were contributed by [Taylor Otwell](https:/
 The default Markdown mail template has received a fresh, more modern design based on the Tailwind CSS color palette. Of course, this template can be published and customized according to your application's needs:
 
 <p align="center">
-<img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1582142674/Screen_Shot_2020-02-19_at_2.04.11_PM.png">
+<img src="https://laravel.com/img/docs/7x-release-notes-notification-preview.png">
 </p>
 
 For more information on Markdown mail, please consult the [mail documentation](/docs/{{version}}/mail#markdown-mailables).

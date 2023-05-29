@@ -8,8 +8,10 @@
     - [The "Park" Command](#the-park-command)
     - [The "Link" Command](#the-link-command)
     - [Securing Sites With TLS](#securing-sites)
+    - [Serving a Default Site](#serving-a-default-site)
 - [Sharing Sites](#sharing-sites)
 - [Site Specific Environment Variables](#site-specific-environment-variables)
+- [Proxying Services](#proxying-services)
 - [Custom Valet Drivers](#custom-valet-drivers)
     - [Local Drivers](#local-drivers)
 - [Other Valet Commands](#other-valet-commands)
@@ -34,6 +36,7 @@ Out of the box, Valet support includes, but is not limited to:
 </style>
 
 <div id="valet-support" markdown="1">
+
 - [Laravel](https://laravel.com)
 - [Lumen](https://lumen.laravel.com)
 - [Bedrock](https://roots.io/bedrock/)
@@ -42,6 +45,7 @@ Out of the box, Valet support includes, but is not limited to:
 - [Contao](https://contao.org/en/)
 - [Craft](https://craftcms.com)
 - [Drupal](https://www.drupal.org/)
+- [ExpressionEngine](https://www.expressionengine.com/)
 - [Jigsaw](https://jigsaw.tighten.co)
 - [Joomla](https://www.joomla.org/)
 - [Katana](https://github.com/themsaid/katana)
@@ -55,6 +59,7 @@ Out of the box, Valet support includes, but is not limited to:
 - [Symfony](https://symfony.com)
 - [WordPress](https://wordpress.org)
 - [Zend](https://framework.zend.com)
+
 </div>
 
 However, you may extend Valet with your own [custom drivers](#custom-valet-drivers).
@@ -74,11 +79,13 @@ Both Valet and Homestead are great choices for configuring your Laravel developm
 **Valet requires macOS and [Homebrew](https://brew.sh/). Before installation, you should make sure that no other programs such as Apache or Nginx are binding to your local machine's port 80.**
 
 <div class="content-list" markdown="1">
+
 - Install or update [Homebrew](https://brew.sh/) to the latest version using `brew update`.
 - Install PHP 7.4 using Homebrew via `brew install php`.
 - Install [Composer](https://getcomposer.org).
 - Install Valet with Composer via `composer global require laravel/valet`. Make sure the `~/.composer/vendor/bin` directory is in your system's "PATH".
 - Run the `valet install` command. This will configure and install Valet and DnsMasq, and register Valet's daemon to launch when your system starts.
+
 </div>
 
 Once Valet is installed, try pinging any `*.test` domain on your terminal using a command such as `ping foobar.test`. If Valet is installed correctly you should see this domain responding on `127.0.0.1`.
@@ -123,9 +130,11 @@ Once Valet is installed, you're ready to start serving sites. Valet provides two
 #### The `park` Command
 
 <div class="content-list" markdown="1">
+
 - Create a new directory on your Mac by running something like `mkdir ~/Sites`. Next, `cd ~/Sites` and run `valet park`. This command will register your current working directory as a path that Valet should search for sites.
 - Next, create a new Laravel site within this directory: `laravel new blog`.
 - Open `http://blog.test` in your browser.
+
 </div>
 
 **That's all there is to it.** Now, any Laravel project you create within your "parked" directory will automatically be served using the `http://folder-name.test` convention.
@@ -136,8 +145,10 @@ Once Valet is installed, you're ready to start serving sites. Valet provides two
 The `link` command may also be used to serve your Laravel sites. This command is useful if you want to serve a single site in a directory and not the entire directory.
 
 <div class="content-list" markdown="1">
+
 - To use the command, navigate to one of your projects and run `valet link app-name` in your terminal. Valet will create a symbolic link in `~/.config/valet/Sites` which points to your current working directory.
 - After running the `link` command, you can access the site in your browser at `http://app-name.test`.
+
 </div>
 
 To see a listing of all of your linked directories, run the `valet links` command. You may use `valet unlink app-name` to destroy the symbolic link.
@@ -155,6 +166,13 @@ To "unsecure" a site and revert back to serving its traffic over plain HTTP, use
 
     valet unsecure laravel
 
+<a name="serving-a-default-site"></a>
+### Serving A Default Site
+
+Sometimes, you may wish to configure Valet to serve a "default" site instead of a `404` when visiting an unknown `test` domain. To accomplish this, you may add a `default` option to your `~/.config/valet/config.json` configuration file containing the path to the site that should serve as your default site:
+
+    "default": "/Users/Sally/Sites/foo",
+
 <a name="sharing-sites"></a>
 ## Sharing Sites
 
@@ -168,11 +186,17 @@ To stop sharing your site, hit `Control + C` to cancel the process.
 
 > {tip} You may pass additional parameters to the share command, such as `valet share --region=eu`. For more information, consult the [ngrok documentation](https://ngrok.com/docs).
 
+### Sharing Sites Via Expose
+
+If you have [Expose](https://beyondco.de/docs/expose) installed, you can share your site by navigating to the site's directory in your terminal and running the `expose` command. Consult the expose documentation for additional command-line parameters it supports. After sharing the site, Expose will display the sharable URL that you may use on your other devices or amongst team members.
+
+To stop sharing your site, hit `Control + C` to cancel the process.
+
 ### Sharing Sites On Your Local Network
 
 Valet restricts incoming traffic to the internal `127.0.0.1` interface by default. This way your development machine isn't exposed to security risks from the Internet.
 
-If you wish to allow other devices on your local network to access the Valet sites on your machine via your machine's IP address (eg: `192.168.1.10/app-name.test`), you will need to manually edit the appropriate Nginx configuration file for that site to remove the restriction on the `listen` directive by removing the the `127.0.0.1:` prefix on the directive for ports 80 and 443.
+If you wish to allow other devices on your local network to access the Valet sites on your machine via your machine's IP address (eg: `192.168.1.10/app-name.test`), you will need to manually edit the appropriate Nginx configuration file for that site to remove the restriction on the `listen` directive by removing the `127.0.0.1:` prefix on the directive for ports 80 and 443.
 
 If you have not run `valet secure` on the project, you can open up network access for all non-HTTPS sites by editing the `/usr/local/etc/nginx/valet/valet.conf` file. However, if you're serving the project site over HTTPS (you have run `valet secure` for the site) then you should edit the `~/.config/valet/Nginx/app-name.test` file.
 
@@ -198,6 +222,23 @@ Some applications using other frameworks may depend on server environment variab
             'key' => 'value',
         ],
     ];
+
+<a name="proxying-services"></a>
+## Proxying Services
+
+Sometimes you may wish to proxy a Valet domain to another service on your local machine. For example, you may occasionally need to run Valet while also running a separate site in Docker; however, Valet and Docker can't both bind to port 80 at the same time.
+
+To solve this, you may use the `proxy` command to generate a proxy. For example, you may proxy all traffic from `http://elasticsearch.test` to `http://127.0.0.1:9200`:
+
+    valet proxy elasticsearch http://127.0.0.1:9200
+
+You may remove a proxy using the `unproxy` command:
+
+    valet unproxy elasticsearch
+
+You may use the `proxies` command to list all site configuration that are proxied:
+
+    valet proxies
 
 <a name="custom-valet-drivers"></a>
 ## Custom Valet Drivers

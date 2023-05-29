@@ -172,7 +172,7 @@ By default, Laravel Mix and Webpack will find `example.png`, copy it to your `pu
 
 As useful as this feature may be, it's possible that your existing folder structure is already configured in a way you like. If this is the case, you may disable `url()` rewriting like so:
 
-    mix.sass('resources/app/app.scss', 'public/css')
+    mix.sass('resources/sass/app.scss', 'public/css')
         .options({
             processCssUrls: false
         });
@@ -210,10 +210,12 @@ Mix provides several features to help you work with your JavaScript files, such 
 With this single line of code, you may now take advantage of:
 
 <div class="content-list" markdown="1">
+
 - ES2015 syntax.
 - Modules
 - Compilation of `.vue` files.
 - Minification for production environments.
+
 </div>
 
 <a name="vendor-extraction"></a>
@@ -229,9 +231,11 @@ If you intend to make frequent updates to your application's JavaScript, you sho
 The `extract` method accepts an array of all libraries or modules that you wish to extract into a `vendor.js` file. Using the above snippet as an example, Mix will generate the following files:
 
 <div class="content-list" markdown="1">
+
 - `public/js/manifest.js`: *The Webpack manifest runtime*
 - `public/js/vendor.js`: *Your vendor libraries*
 - `public/js/app.js`: *Your application code*
+
 </div>
 
 To avoid JavaScript errors, be sure to load these files in the proper order:
@@ -350,7 +354,7 @@ You may inject environment variables into Mix by prefixing a key in your `.env` 
 
     MIX_SENTRY_DSN_PUBLIC=http://example.com
 
-After the variable has been defined in your `.env` file, you may access via the `process.env` object. If the value changes while you are running a `watch` task, you will need to restart the task:
+After the variable has been defined in your `.env` file, you may access it via the `process.env` object. If the value changes while you are running a `watch` task, you will need to restart the task:
 
     process.env.MIX_SENTRY_DSN_PUBLIC
 

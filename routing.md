@@ -65,7 +65,7 @@ Sometimes you may need to register a route that responds to multiple HTTP verbs.
 
 #### CSRF Protection
 
-Any HTML forms pointing to `POST`, `PUT`, or `DELETE` routes that are defined in the `web` routes file should include a CSRF token field. Otherwise, the request will be rejected. You can read more about CSRF protection in the [CSRF documentation](/docs/{{version}}/csrf):
+Any HTML forms pointing to `POST`, `PUT`, `PATCH`, or `DELETE` routes that are defined in the `web` routes file should include a CSRF token field. Otherwise, the request will be rejected. You can read more about CSRF protection in the [CSRF documentation](/docs/{{version}}/csrf):
 
     <form method="POST" action="/profile">
         @csrf
@@ -192,6 +192,8 @@ Named routes allow the convenient generation of URLs or redirects for specific r
 You may also specify route names for controller actions:
 
     Route::get('user/profile', 'UserProfileController@show')->name('profile');
+
+> {note} Route names should always be unique.
 
 #### Generating URLs To Named Routes
 
@@ -408,9 +410,10 @@ Alternatively, you may override the `resolveRouteBinding` method on your Eloquen
      * Retrieve the model for a bound value.
      *
      * @param  mixed  $value
+     * @param  string|null  $field
      * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function resolveRouteBinding($value)
+    public function resolveRouteBinding($value, $field = null)
     {
         return $this->where('name', $value)->firstOrFail();
     }

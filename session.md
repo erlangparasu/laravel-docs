@@ -9,6 +9,7 @@
     - [Flash Data](#flash-data)
     - [Deleting Data](#deleting-data)
     - [Regenerating The Session ID](#regenerating-the-session-id)
+- [Session Blocking](#session-blocking)
 - [Adding Custom Session Drivers](#adding-custom-session-drivers)
     - [Implementing The Driver](#implementing-the-driver)
     - [Registering The Driver](#registering-the-driver)
@@ -26,11 +27,13 @@ The session configuration file is stored at `config/session.php`. Be sure to rev
 The session `driver` configuration option defines where session data will be stored for each request. Laravel ships with several great drivers out of the box:
 
 <div class="content-list" markdown="1">
+
 - `file` - sessions are stored in `storage/framework/sessions`.
 - `cookie` - sessions are stored in secure, encrypted cookies.
 - `database` - sessions are stored in a relational database.
 - `memcached` / `redis` - sessions are stored in one of these fast, cache based stores.
 - `array` - sessions are stored in a PHP array and will not be persisted.
+
 </div>
 
 > {tip} The array driver is used during [testing](/docs/{{version}}/testing) and prevents the data stored in the session from being persisted.
@@ -44,7 +47,7 @@ When using the `database` session driver, you will need to create a table to con
 
     Schema::create('sessions', function ($table) {
         $table->string('id')->unique();
-        $table->unsignedInteger('user_id')->nullable();
+        $table->foreignId('user_id')->nullable();
         $table->string('ip_address', 45)->nullable();
         $table->text('user_agent')->nullable();
         $table->text('payload');
@@ -192,11 +195,38 @@ The `forget` method will remove a piece of data from the session. If you would l
 <a name="regenerating-the-session-id"></a>
 ### Regenerating The Session ID
 
-Regenerating the session ID is often done in order to prevent malicious users from exploiting a [session fixation](https://en.wikipedia.org/wiki/Session_fixation) attack on your application.
+Regenerating the session ID is often done in order to prevent malicious users from exploiting a [session fixation](https://owasp.org/www-community/attacks/Session_fixation) attack on your application.
 
 Laravel automatically regenerates the session ID during authentication if you are using the built-in `LoginController`; however, if you need to manually regenerate the session ID, you may use the `regenerate` method.
 
     $request->session()->regenerate();
+
+<a name="session-blocking"></a>
+## Session Blocking
+
+> {note} To utilize session blocking, your application must be using a cache driver that supports [atomic locks](/docs/{{version}}/cache#atomic-locks). Currently, those cache drivers include the `memcached`, `dynamodb`, `redis`, and `database` drivers. In addition, you may not use the `cookie` session driver.
+
+By default, Laravel allows requests using the same session to execute concurrently. So, for example, if you use a JavaScript HTTP library to make two HTTP requests to your application, they will both execute at the same time. For many applications, this is not a problem; however, session data loss can occur in a small subset of applications that make concurrent requests to two different application endpoints which both write data to the session.
+
+To mitigate this, Laravel provides functionality that allows you to limit concurrent requests for a given session. To get started, you may simply chain the `block` method onto your route definition. In this example, an incoming request to the `/profile` endpoint would acquire a session lock. While this lock is being held, any incoming requests to the `/profile` or `/order` endpoints which share the same session ID will wait for the first request to finish executing before continuing their execution:
+
+    Route::post('/profile', function () {
+        //
+    })->block($lockSeconds = 10, $waitSeconds = 10)
+
+    Route::post('/order', function () {
+        //
+    })->block($lockSeconds = 10, $waitSeconds = 10)
+
+The `block` method accepts two optional arguments. The first argument accepted by the `block` method is the maximum number of seconds the session lock should be held for before it is released. Of course, if the request finishes executing before this time the lock will be released earlier.
+
+The second argument accepted by the `block` method is the number of seconds a request should wait while attempting to obtain a session lock. A `Illuminate\Contracts\Cache\LockTimeoutException` will be thrown if the request is unable to obtain a session lock within the given number of seconds.
+
+If neither of these arguments are passed, the lock will be obtained for a maximum of 10 seconds and requests will wait a maximum of 10 seconds while attempting to obtain a lock:
+
+    Route::post('/profile', function () {
+        //
+    })->block()
 
 <a name="adding-custom-session-drivers"></a>
 ## Adding Custom Session Drivers
@@ -225,12 +255,14 @@ Your custom session driver should implement the `SessionHandlerInterface`. This 
 Since the purpose of these methods is not readily understandable, let's quickly cover what each of the methods do:
 
 <div class="content-list" markdown="1">
+
 - The `open` method would typically be used in file based session store systems. Since Laravel ships with a `file` session driver, you will almost never need to put anything in this method. You can leave it as an empty stub. It is a fact of poor interface design (which we'll discuss later) that PHP requires us to implement this method.
 - The `close` method, like the `open` method, can also usually be disregarded. For most drivers, it is not needed.
 - The `read` method should return the string version of the session data associated with the given `$sessionId`. There is no need to do any serialization or other encoding when retrieving or storing session data in your driver, as Laravel will perform the serialization for you.
 - The `write` method should write the given `$data` string associated with the `$sessionId` to some persistent storage system, such as MongoDB, Dynamo, etc.  Again, you should not perform any serialization - Laravel will have already handled that for you.
 - The `destroy` method should remove the data associated with the `$sessionId` from persistent storage.
 - The `gc` method should destroy all session data that is older than the given `$lifetime`, which is a UNIX timestamp. For self-expiring systems like Memcached and Redis, this method may be left empty.
+
 </div>
 
 <a name="registering-the-driver"></a>
